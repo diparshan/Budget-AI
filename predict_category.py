@@ -54,6 +54,7 @@ def predict_category_for_walmart_dl(pdf_path, tokenizer_path, label_encoder_path
     # Map predicted labels back to original category names
     # Replace 'Unknown' category with predicted
     walmart_df["Category"] = label_encoder.inverse_transform(predicted_labels)
+    walmart_df["User_Corrected_Category"] = "" # New column for user corrections
 
     #dropping description_processed column
     walmart_df.drop(columns=["Description_processed"], inplace=True)
@@ -92,6 +93,6 @@ if __name__ == "__main__":
         )
 
         predicted_transactions_df_dl.to_csv(output_csv_path, index=False)
-        print(f"\n✅ Predicted transactions saved to {output_csv_path}")
+        print(f"\nPredicted transactions saved to {output_csv_path}")
 
 

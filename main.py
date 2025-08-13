@@ -32,16 +32,22 @@ def main():
                 pdf_file, dl_tokenizer_file, dl_label_enc_file, dl_model_file
             )
             if not dl_predicted_df.empty:
-                dl_predicted_df = dl_predicted_df[["Trans Date", "Post Date", "Description", "Category", "Amount"]]
-
-                # Save inside predictions/ with same naming pattern
-                base_name = os.path.splitext(os.path.basename(pdf_file))[0]
-                output_dl_csv = os.path.join(predictions_dir, f"{base_name}_predictions.csv")
-
+                output_dl_csv = f"predictions/{os.path.basename(pdf_file).replace(".pdf", "_dl_for_review.csv")}"
                 dl_predicted_df.to_csv(output_dl_csv, index=False)
-                print(f"Deep Learning predictions saved to {output_dl_csv}")
+                print(f"Deep Learning predictions for review saved to {output_dl_csv}")
             else:
                 print(f"No transactions predicted by Deep Learning for {pdf_file}.")
+            # if not dl_predicted_df.empty:
+            #     dl_predicted_df = dl_predicted_df[["Trans Date", "Post Date", "Description", "Category", "Amount"]]
+
+            #     # Save inside predictions/ with same naming pattern
+            #     base_name = os.path.splitext(os.path.basename(pdf_file))[0]
+            #     output_dl_csv = os.path.join(predictions_dir, f"{base_name}_predictions.csv")
+
+            #     dl_predicted_df.to_csv(output_dl_csv, index=False)
+            #     print(f"Deep Learning predictions saved to {output_dl_csv}")
+            # else:
+            #     print(f"No transactions predicted by Deep Learning for {pdf_file}.")
         except Exception as e:
             print(f"Error running Deep Learning prediction for {pdf_file}: {e}")
 
