@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Results — BudgetMind{% endblock %}
+
+{% block extra_head %}
+<style>
+  .centered { display:flex; justify-content:center; }
+  .summary-card h2 { margin-bottom: .5rem; }
+  .summary-table td, .summary-table th { padding: .8rem 1rem; }
+  .summary-table .amount { font-variant-numeric: tabular-nums; font-weight:600; }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h1 class="h3 m-0">Results</h1>
+    <a class="btn btn-sm btn-secondary" href="/">← Upload another file</a>
+  </div>
+
+  <!-- 1) TOP: Preview table -->
+  <div class="card p-4 mb-4">
+    <h2 class="h5">Preview ({{ rows }} rows total)</h2>
+    <div class="table-wrap mt-2">
+      <div class="table-responsive" style="max-height:420px;">
+        <table class="table-modern align-middle">
+          <thead>
+            <tr>
+              <th>Trans Date</th>
+              <th>Post Date</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in preview %}
+              {% set cat = r.get('Predicted Category', r.get('Category','')) %}
+              {% set color = summary.color_map.get(cat, '#1b2540') %}
+              <tr>
+                <td>{{ r["Trans Date"] }}</td>
+                <td>{{ r["Post Date"] }}</td>
+                <td>{{ r["Description"] }}</td>
+                <td class="amount">{{ '$' ~ '{:,.2f}'.format(r["Amount"]) }}</td>
+                <td><span class="badge-cat" data-color="{{ color }}">{{ cat }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mt-2 muted">Showing first {{ preview|length }} rows.</div>
+  </div>
+
+  <!-- 2) MIDDLE: Pie chart centered -->
+  <div class="card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h5 m-0">Transactions Category <span class="muted">({{ summary.month }})</span></h2>
+      <div class="chip"><strong>Total:</strong> {{ '$' ~ '{:,.2f}'.format(summary.total) }}</div>
+    </div>
+    <div class="centered mt-3">
+      <canvas id="donut" style="max-width: 420px; max-height: 420px;"></canvas>
+    </div>
+  </div>
+
+  <!-- 3) BELOW CHART: Category summary table -->
+  <div class="card p-4 mb-4 summary-card">
+    <h2 class="h5">Category Summary</h2>
+    <div class="table-wrap mt-2">
+      <div class="table-responsive">
+        <table class="table-modern align-middle summary-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in summary.series %}
+              {% set pct = (item.value / (summary.total if summary.total else 1)) * 100 %}
+              <tr>
+                <td><span class="badge-cat" data-color="{{ item.color }}">{{ item.label }}</span></td>
+                <td class="amount">{{ '$' ~ '{:,.2f}'.format(item.value|float) }}</td>
+                <td>{{ '{:.1f}%'.format(pct) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4) BOTTOM: Download button centered -->
+  <div class="text-center mb-2">
+    <a class="btn btn-download" href="{{ url_for('download_prediction', filename=download_name) }}" download>
+      ⬇️ Download predictions CSV
+    </a>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+  <!-- Chart data as pure JSON -->
+  <script id="chart-series" type="application/json">
+    {{ summary.series|tojson }}
+  </script>
+
+  <script>
+    (function () {
+      // Apply badge colors from data-color
+      document.querySelectorAll('.badge-cat[data-color]').forEach(el => {
+        const col = el.getAttribute('data-color');
+        if (col) el.style.backgroundColor = col;
+      });
+
+      // Build chart from JSON
+      const raw = document.getElementById('chart-series')?.textContent || '[]';
+      let chartData; try { chartData = JSON.parse(raw); } catch { chartData = []; }
+
+      const chartLabels = chartData.map(d => d.label);
+      const chartValues = chartData.map(d => Number(d.value) || 0);
+      const chartColors = chartData.map(d => d.color || '#1b2540');
+
+      const ctx = document.getElementById('donut').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: chartLabels, datasets: [{ data: chartValues, backgroundColor: chartColors }] },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const v = Number(ctx.raw ?? 0);
+                  return `${ctx.label}: $${v.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                }
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    })();
+  </script>
+{% endblock %}

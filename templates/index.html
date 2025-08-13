@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Upload Statement — BudgetMind{% endblock %}
+
+{% block content %}
+  <div class="mx-auto" style="max-width: 760px;">
+    <div class="mb-4 text-center">
+      <h1 class="h3 m-0">Upload a statement</h1>
+      <p class="muted mt-2">We’ll categorize transactions and summarize your spend.</p>
+    </div>
+
+    <div class="card shadow-lg p-4">
+      <form method="post" action="{{ url_for('upload_pdf') }}" enctype="multipart/form-data" class="d-grid gap-3">
+        <div>
+          <label class="form-label">Statement PDF</label>
+          <input class="form-control" type="file" name="statement" accept="application/pdf" required>
+          <div class="form-text muted">Your CSV will be generated and available to download.</div>
+        </div>
+        <button class="btn btn-primary btn-lg" type="submit">Predict categories</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
