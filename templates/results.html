@@ -8,12 +8,16 @@
   .summary-table td, .summary-table th { padding: .8rem 1rem; }
   .summary-table .amount { font-variant-numeric: tabular-nums; font-weight:600; }
 </style>
-{% endblock %}
+{% endblock %}      
 
 {% block content %}
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
     <h1 class="h3 m-0">Results</h1>
-    <a class="btn btn-sm btn-secondary" href="/">← Upload another file</a>
+    <div class="d-flex gap-2">
+      <!-- NEW: edit categories button -->
+      <a class="btn btn-sm btn-primary" href="{{ url_for('edit_categories', filename=download_name) }}">✏️ Edit categories</a>
+      <a class="btn btn-sm btn-secondary" href="/">← Upload another file</a>
+    </div>
   </div>
 
   <!-- 1) TOP: Preview table -->
@@ -33,7 +37,8 @@
           </thead>
           <tbody>
             {% for r in preview %}
-              {% set cat = r.get('Predicted Category', r.get('Category','')) %}
+              {# NEW: prefer user-corrected category, then predicted, then raw #}
+              {% set cat = r.get('User_Corrected_Category') or r.get('Predicted Category') or r.get('Category','') %}
               {% set color = summary.color_map.get(cat, '#1b2540') %}
               <tr>
                 <td>{{ r["Trans Date"] }}</td>
@@ -91,7 +96,9 @@
 
   <!-- 4) BOTTOM: Download button centered -->
   <div class="text-center mb-2">
-    <a class="btn btn-download" href="{{ url_for('download_prediction', filename=download_name) }}" download>
+    {# NEW: choose corrected vs predictions route #}
+    {% set dl_endpoint = 'download_corrected' if download_kind == 'corrected' else 'download_prediction' %}
+    <a class="btn btn-download" href="{{ url_for(dl_endpoint, filename=download_name) }}" download>
       ⬇️ Download predictions CSV
     </a>
   </div>

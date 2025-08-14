@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Edit Categories — BudgetMind{% endblock %}
+
+{% block extra_head %}
+<style>
+  .editor-controls { display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; justify-content:space-between; }
+  .sticky-actions { position: sticky; bottom: 0; background: var(--card); padding: .75rem 0; border-top: 1px solid var(--line); }
+  .select-cat { min-width: 240px; }
+  .table-modern td, .table-modern th { white-space: nowrap; }
+  .desc-cell { white-space: normal; max-width: 520px; }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h1 class="h4 m-0">Edit Categories</h1>
+    <button type="button" class="btn btn-sm btn-secondary" onclick="window.history.back()">← Back</button>
+  </div>
+
+  <form method="post" action="{{ url_for('save_corrections') }}">
+    <input type="hidden" name="source_csv" value="{{ filename }}"/>
+
+    <div class="card p-4">
+      <div class="editor-controls mb-3">
+        <div class="muted">Editing: <code>{{ filename }}</code></div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-secondary" href="{{ url_for('edit_categories', filename=filename) }}">Reset page</a>
+          <button type="submit" class="btn btn-primary">💾 Save corrections</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-responsive" style="max-height:60vh;">
+          <table class="table-modern align-middle">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Trans Date</th>
+                <th>Post Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Predicted</th>
+                <th>Corrected</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% set n = rows|length %}
+              <input type="hidden" name="n" value="{{ n }}"/>
+              {% for r in rows %}
+                {% set i = loop.index0 %}
+                {% set pred = r.get("Predicted Category", r.get("Category","")) %}
+                {% set corrected = r.get("User_Corrected_Category","") %}
+                <tr>
+                  <td class="muted">{{ i + 1 }}</td>
+                  <td>{{ r.get("Trans Date","") }}</td>
+                  <td>{{ r.get("Post Date","") }}</td>
+                  <td class="desc-cell">{{ r.get("Description","") }}</td>
+                  <td class="amount">{{ '$' ~ '{:,.2f}'.format(r.get("Amount",0) or 0) }}</td>
+                  <td>
+                    <!-- Color will be applied via palette map in extra_scripts -->
+                    <span class="badge-cat" data-label="{{ pred }}">{{ pred }}</span>
+                  </td>
+                  <td>
+                    <select class="form-select form-select-sm select-cat" name="cat_{{ i }}">
+                      <option value="">— keep {{ corrected or pred }} —</option>
+                      {% for opt in options %}
+                        <option value="{{ opt }}" {% if corrected and corrected==opt %}selected{% endif %}>{{ opt }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sticky-actions">
+        <div class="d-flex justify-content-end gap-2">
+          <a class="btn btn-secondary" href="{{ url_for('edit_categories', filename=filename) }}">Reset page</a>
+          <button type="submit" class="btn btn-primary">💾 Save corrections</button>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Canonical palette (matches server CATEGORY_PALETTE) -->
+<script id="cat-palette" type="application/json">
+{
+  "Restaurants": "#f97316",
+  "Retail and Grocery": "#22c55e",
+  "Personal and Household Expenses": "#a855f7",
+  "Professional and Financial Services": "#06b6d4",
+  "Transportation": "#eab308",
+  "Entertainment and Recreation": "#ef4444",
+  "Health and Education": "#3b82f6",
+  "Foreign Currency Transactions": "#8b5cf6",
+  "Other Transactions": "#64748b"
+}
+</script>
+
+<script>
+  (function () {
+    // First: honor any explicit data-color (back-compat)
+    document.querySelectorAll('.badge-cat[data-color]').forEach(el => {
+      const col = el.getAttribute('data-color');
+      if (col) el.style.backgroundColor = col;
+    });
+
+    // Then: apply canonical palette by data-label or inner text
+    const raw = document.getElementById('cat-palette')?.textContent || '{}';
+    let palette = {};
+    try { palette = JSON.parse(raw); } catch { palette = {}; }
+
+    document.querySelectorAll('.badge-cat').forEach(el => {
+      if (el.style.backgroundColor) return; // already colored above
+      const label = (el.getAttribute('data-label') || el.textContent || '').trim();
+      const col = palette[label] || '#64748b';
+      el.style.backgroundColor = col;
+    });
+  })();
+</script>
+{% endblock %}
