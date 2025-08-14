@@ -6,85 +6,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
     :root {
       /* Palette */
-      --bg: #0b1220;          /* page background */
-      --card: #101a2f;        /* card background */
-      --line: #1f2a44;        /* borders/dividers */
-      --text: #f8fafc;        /* bright text */
-      --muted: #cbd5e1;       /* readable secondary text */
-      --chip: #16233d;        /* chip background */
+      --bg: #0b1220;
+      --card: #101a2f;
+      --line: #1f2a44;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --chip: #16233d;
       --brand: #4f46e5;
-      --brand-dark: #4338ca;
       --success: #10b981;
-      --success-dark: #0ea371;
-  
-      /* Bootstrap integration */
+
+      /* Bootstrap variable overrides */
+      --bs-primary: var(--brand);
+      --bs-primary-rgb: 79,70,229;
+      --bs-success: var(--success);
+      --bs-success-rgb: 16,185,129;
+
+      --bs-body-bg: var(--bg);
       --bs-body-color: var(--text);
+      --bs-border-color: var(--line);
       --bs-heading-color: var(--text);
       --bs-secondary-color: var(--muted);
+
+      --bs-card-bg: var(--card);
+      --bs-card-border-color: var(--line);
+
+      --bs-form-control-bg: var(--card);
+      --bs-form-control-color: var(--text);
+      --bs-form-control-border-color: var(--line);
+      --bs-focus-ring-color: rgba(79,70,229,.25);
     }
-  
+
     html, body { background: var(--bg); color: var(--text); }
     .navbar { background: transparent; border-bottom: 1px solid var(--line); }
     .brand { font-weight: 700; letter-spacing: .3px; color: var(--text); text-decoration: none; }
     .brand:hover { color: var(--text); opacity: .9; }
-  
-    /* Headings + secondary text */
-    h1, h2, h3, h4, h5, h6 { color: var(--text); }
-    .muted { color: var(--muted) !important; opacity: 1; }
-  
+    .muted { color: var(--muted) !important; }
+
     .card { background: var(--card); border: 1px solid var(--line); }
-  
-    /* Buttons */
-    .btn-primary { background: var(--brand); border-color: var(--brand); }
-    .btn-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+
+    /* Optional helper button using your success color */
     .btn-download { background: var(--success); border: 0; color: #fff; }
-    .btn-download:hover { background: var(--success-dark); color: #fff; }
-  
-    /* Inputs (including file input) */
-    .form-control {
-      background-color: var(--card);
-      border-color: var(--line);
-      color: var(--text);
-    }
-    .form-control:focus {
-      box-shadow: 0 0 0 .25rem rgba(79,70,229,.25);
-      border-color: var(--brand);
-    }
-    .form-text { color: var(--muted); }
-  
-    /* File input button (Chromium/Firefox) */
-    input[type="file"].form-control::file-selector-button {
-      background: var(--brand);
-      color: #fff;
-      border: 1px solid var(--brand);
-      border-radius: .5rem;
-      padding: .45rem .9rem;
-      margin-right: .75rem;
-      cursor: pointer;
-    }
-    input[type="file"].form-control:hover::file-selector-button {
-      background: var(--brand-dark);
-      border-color: var(--brand-dark);
-    }
-    /* Safari */
-    input[type="file"].form-control::-webkit-file-upload-button {
-      background: var(--brand);
-      color: #fff;
-      border: 1px solid var(--brand);
-      border-radius: .5rem;
-      padding: .45rem .9rem;
-      margin-right: .75rem;
-      cursor: pointer;
-    }
-    input[type="file"].form-control:hover::-webkit-file-upload-button {
-      background: var(--brand-dark);
-      border-color: var(--brand-dark);
-    }
-  
-    /* Chip + category badges */
+    .btn-download:hover { filter: brightness(0.9); color: #fff; }
+
+    /* File input button: black, subtle hover color + shadow */
+input[type="file"].form-control::file-selector-button {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
+  border-radius: .375rem !important;
+  padding: .45rem .9rem !important;
+  margin-right: .75rem !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+input[type="file"].form-control:hover::file-selector-button {
+  background-color: #1a1a1a !important; /* lighter black */
+  border-color: #1a1a1a !important;
+  box-shadow: 0 0 6px rgba(255,255,255,0.15) !important;
+}
+
+/* Safari/WebKit */
+input[type="file"].form-control::-webkit-file-upload-button {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
+  border-radius: .375rem !important;
+  padding: .45rem .9rem !important;
+  margin-right: .75rem !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+input[type="file"].form-control:hover::-webkit-file-upload-button {
+  background-color: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  box-shadow: 0 0 6px rgba(255,255,255,0.15) !important;
+}
+
+
+    /* Chips & badges */
     .chip {
       background: var(--chip);
       border-radius: 9999px;
@@ -102,44 +105,30 @@
       font-weight: 600;
       font-size: .8rem;
     }
-  
-    /* Modern table theme */
+
+    /* Dark table theme */
     .table-wrap { border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
-    .table-modern {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      background: transparent;
-    }
+    .table-modern { width: 100%; border-collapse: separate; border-spacing: 0; background: transparent; }
     .table-modern thead th {
       position: sticky; top: 0; z-index: 1;
-      background: #0e1730;                 /* darker header */
-      color: #e2e8f0;                      /* brighter header text */
+      background: #0e1730;
+      color: #e2e8f0;
       text-transform: uppercase;
       letter-spacing: .04em;
       font-size: .78rem;
       border-bottom: 1px solid #1f2a44;
       padding: .85rem 1rem;
     }
-    .table-modern tbody td {
-      padding: .8rem 1rem;
-      border-top: 1px solid rgba(255,255,255,.05);
-    }
-    .table-modern tbody tr:nth-child(even) { background: rgba(148,163,184,.05); } /* zebra */
-    .table-modern tbody tr:hover { background: rgba(148,163,184,.1); }             /* hover */
-    .table-modern .amount { font-variant-numeric: tabular-nums; font-weight: 600; }
-  
-    /* Ensure vertical scroll works with sticky header */
-    .table-responsive { overflow-y: auto; }
-  
-    /* Make table header look stronger than default muted */
+    .table-modern tbody td { padding: .8rem 1rem; border-top: 1px solid rgba(255,255,255,.05); }
+    .table-modern tbody tr:nth-child(even) { background: rgba(148,163,184,.05); }
+    .table-modern tbody tr:hover { background: rgba(148,163,184,.1); }
     .table thead th { color: #e2e8f0; }
+    .table-responsive { overflow-y: auto; }
   </style>
-  
+
   {% block extra_head %}{% endblock %}
 </head>
 <body class="pb-5">
-
   <nav class="navbar">
     <div class="container d-flex justify-content-between align-items-center py-3">
       <a class="brand" href="/">Budget Classifier AI</a>
@@ -149,6 +138,9 @@
 
   <main class="container py-4">
     {% block content %}{% endblock %}
+    <!-- Example usage:
+    <input class="form-control" type="file" name="statement" accept="application/pdf" required>
+    -->
   </main>
 
   {% block extra_scripts %}{% endblock %}
