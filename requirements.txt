@@ -1,13 +1,9 @@
-pandas
-scikit-learn
-tensorflow
-keras
-joblib
-pdfplumber
-scipy
-matplotlib
-seaborn
-flask
-numpy
-pymupdf
 
+Flask==3.0.3
+gunicorn==21.2.0
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+joblib==1.4.2
+tensorflow==2.16.1
+pdfplumber==0.11.7
